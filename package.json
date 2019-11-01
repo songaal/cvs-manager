@@ -1,0 +1,22 @@
+{
+  "name": "Genie",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "async": "latest",
+    "dateformat": "^3.0.3",
+    "express": "^4.15.1",
+    "morgan": "^1.9.1",
+    "mysql2": "^2.0.0"
+  },
+  "devDependencies": {
+    "mocha": "^6.2.2"
+  }
+}
