@@ -4,6 +4,8 @@ const logger = require('morgan');
 const dbService = require('./db-service');
 const C = require('./contant');
 const Josa = require('josa-js');
+const utils = require('./utils');
+const branchMap = {};
 
 (async function() {
     app.use(express.json());
@@ -16,13 +18,50 @@ const Josa = require('josa-js');
         res.status(200).send(responseBody);
     });
 
+    app.post('/select_branch', function(req, res) {
+        let body = req.body;
+        let bot_user_key = body.userRequest.user.id;
+        let branch = body.userRequest.utterance;
+        branchMap[bot_user_key] = branch;
+
+        const responseBody = {
+            "version": "2.0",
+            "template": {
+                "outputs": [
+                    {
+                        "simpleText": {
+                            "text": `${branch}으로 설정되었습니다.(굿)`
+                        }
+                    }
+                ],
+                quickReplies: [
+                    {
+                        label: '재고확인',
+                        action: 'block',
+                        blockId: '5dbdab1292690d0001e87a26'
+                    },
+                    {
+                        label: '납품일정',
+                        action: 'message',
+                        messageText: '납품일정'
+                    },
+                    {
+                        label: '재고부족',
+                        action: 'message',
+                        messageText: '재고부족'
+                    }
+                ]
+            }
+        };
+        res.status(200).send(responseBody);
+
+    });
     /**
      * 재고확인
      * */
     app.post('/check_stock', function(req, res) {
-
-        let context = utils.getContext(req.body.contexts, 'global');
-        let item_name = context.params.item.value
+        // let context = utils.getContext(req.body.contexts, 'global');
+        let item_name = req.body.action.params.item;
         let item_with_josa = Josa.r(item_name,'은/는');
         let item = dbService.check_stock(item_name);
         let amount = item[0];
