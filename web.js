@@ -59,13 +59,32 @@ const branchMap = {};
     /**
      * 재고확인
      * */
-    app.post('/check_stock', function(req, res) {
+    app.post('/check_stock', async function(req, res) {
+        let body = req.body;
+        let bot_user_key = body.userRequest.user.id;
+        let branch = branchMap[bot_user_key];
         // let context = utils.getContext(req.body.contexts, 'global');
         let item_name = req.body.action.params.item;
         let item_with_josa = Josa.r(item_name,'은/는');
-        let item = dbService.check_stock(item_name);
-        let amount = item[0];
-        let depot = item[1];
+        let ret = await dbService.check_stock(branch, item_name);
+        //TODO branch 나 품목이 없을 경우  undefined...처리..
+        if (ret == undefined) {
+            const responseBody = {
+                "version": "2.0",
+                "template": {
+                    "outputs": [
+                        {
+                            "simpleText": {
+                                "text": `에러발생.`
+                            }
+                        }
+                    ]
+                }
+            };
+            res.status(200).send(responseBody);
+        }
+        let amount = ret.amount;
+        let depot = ret.depot;
 
         const responseBody = {
             "version": "2.0",
