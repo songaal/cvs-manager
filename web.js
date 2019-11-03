@@ -3,6 +3,7 @@ const app = express();
 const logger = require('morgan');
 const dbService = require('./db-service');
 const C = require('./contant');
+const Josa = require('josa-js');
 
 (async function() {
     app.use(express.json());
@@ -15,11 +16,84 @@ const C = require('./contant');
         res.status(200).send(responseBody);
     });
 
+    /**
+     * 재고확인
+     * */
+    app.post('/check_stock', function(req, res) {
+
+        let context = utils.getContext(req.body.contexts, 'global');
+        let item_name = context.params.item.value
+        let item_with_josa = Josa.r(item_name,'은/는');
+        let item = dbService.check_stock(item_name);
+        let amount = item[0];
+        let depot = item[1];
+
+        const responseBody = {
+            "version": "2.0",
+            "template": {
+                "outputs": [
+                    {
+                        "simpleText": {
+                            "text": `${item_with_josa} ${amount}개의 재고가 ${depot}창고에 있습니다.`
+                        }
+                    }
+                ]
+            }
+        };
+        res.status(200).send(responseBody);
+    });
+
+    /**
+     * 납품일정
+     * */
+    app.post('/supply_schedule', function(req, res) {
+        let dodate = '';
+        let amount = 0;
+        let item_with_josa = '';
+
+        let message = `${dodate}에 ${amount}ea 예정입니다.`
+        let message2 = `${item_with_josa} 현재 납품일정이 없습니다.`
+        const responseBody = {
+            "version": "2.0",
+            "template": {
+                "outputs": [
+                    {
+                        "simpleText": {
+                            "text": message2
+                        }
+                    }
+                ]
+            }
+        };
+        res.status(200).send(responseBody);
+    });
+
+    /**
+     * 재고부족
+     * */
+    app.post('/short_stock', function(req, res) {
+        let sql = 'select * from stock where amount = 0'
+        let message = `${yyyymmdd}에 ${amount}ea 예정입니다.`;
+
+        const responseBody = {
+            "version": "2.0",
+            "template": {
+                "outputs": [
+                    {
+                        "simpleText": {
+                            "text": message
+                        }
+                    }
+                ]
+            }
+        };
+        res.status(200).send(responseBody);
+    });
 
     /**
      * Server
      * */
-    const server = app.listen(8002, function() {
+    const server = app.listen(C.HTTP_PORT, function() {
         const host = server.address().address;
         const port = server.address().port;
         console.log('Kakao Chatbot API listening at http://%s:%s', host, port);

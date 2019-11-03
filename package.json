@@ -13,6 +13,7 @@
     "async": "latest",
     "dateformat": "^3.0.3",
     "express": "^4.15.1",
+    "josa-js": "0.0.2",
     "morgan": "^1.9.1",
     "mysql2": "^2.0.0"
   },
